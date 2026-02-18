@@ -1,0 +1,30 @@
+# Newsletter Digest Agent — Dependencies
+
+# Gmail API
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+
+# Gemini LLM
+google-generativeai
+
+# HTML parsing (newsletters)
+beautifulsoup4
+readability-lxml
+lxml
+
+# YouTube transcription
+youtube-transcript-api
+
+# Podcast download + transcription
+yt-dlp
+openai
+
+# Notion API
+notion-client
+
+# Timezone
+pytz
+
+# Environment variables
+python-dotenv

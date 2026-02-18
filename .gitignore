@@ -1,0 +1,15 @@
+# Secrets
+.env
+credentials.json
+token.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Data
+data/
+
+# macOS
+.DS_Store
