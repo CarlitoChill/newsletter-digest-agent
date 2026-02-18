@@ -500,14 +500,12 @@ def create_idea_page(
     all_blocks = callout_blocks + verdict_blocks + member_blocks + deck_blocks + competitor_blocks
     children = all_blocks[:100]
 
-    # Propriétés de la database — utilise le score boardroom si disponible
+    # Propriétés de la database — format API Notion (type wrappers obligatoires)
     properties = {
-        "title": [{"text": {"content": idea_name}}],
+        "title": {"title": [{"text": {"content": idea_name}}]},
     }
-    if display_score is not None:
-        properties["Score"] = display_score
     if tldr:
-        properties["TLDR"] = tldr
+        properties["TLDR"] = {"rich_text": [{"text": {"content": tldr[:2000]}}]}
     if tags:
         valid_tags = [
             "SaaS", "Marketplace", "AI Agency", "AI-Powered Agency",
@@ -516,12 +514,12 @@ def create_idea_page(
         ]
         filtered_tags = [t for t in tags if t in valid_tags]
         if filtered_tags:
-            properties["Tags"] = json.dumps(filtered_tags)
+            properties["Tags"] = {"multi_select": [{"name": t} for t in filtered_tags]}
     if sources:
-        properties["Source"] = sources
+        properties["Source"] = {"rich_text": [{"text": {"content": sources[:2000]}}]}
     if week_label:
-        properties["Semaine"] = week_label
-    properties["Status"] = "Nouveau"
+        properties["Semaine"] = {"rich_text": [{"text": {"content": week_label}}]}
+    properties["Status"] = {"select": {"name": "Nouveau"}}
 
     if boardroom and boardroom.get("verdicts"):
         member_to_column = {
@@ -534,7 +532,7 @@ def create_idea_page(
             column = member_to_column.get(v.get("member_id", ""))
             member_score = v.get("score")
             if column and member_score is not None:
-                properties[column] = member_score
+                properties[column] = {"number": member_score}
 
     page = notion.pages.create(
         parent={"database_id": NOTION_IDEAS_DB_ID},
