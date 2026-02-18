@@ -59,7 +59,7 @@ USER_EMAIL — label "Newsletters-Digest"
 | Stockage | SQLite (built-in Python) | Zero setup, suffisant pour le volume |
 | Notion | notion-client (SDK) + requests (database queries) | Database inline avec proprietes |
 | Email (envoi) | Gmail API | Digest vers USER_EMAIL |
-| Orchestration | macOS launchd | Poll quotidien 6h + digest vendredi 12h, automatique |
+| Orchestration | macOS launchd | Poll quotidien 6h + digest vendredi 12h |
 
 ## Structure du code
 
@@ -177,8 +177,8 @@ python -m src.main digest --force
 ## Automatisation (launchd)
 
 Le poll et le digest tournent automatiquement via macOS launchd :
-- **Poll** : tous les jours a 6h (heure de Paris)
-- **Digest** : tous les vendredis a 12h (heure de Paris)
+- **Poll** : tous les jours a 6h (heure de Paris) — `scripts/run_poll.sh`
+- **Digest** : tous les vendredis a 12h (heure de Paris) — `scripts/run_digest.sh`
 
 Les fichiers plist sont dans `~/Library/LaunchAgents/`. Voir SETUP.md pour le detail.
 
@@ -203,17 +203,38 @@ Les fichiers plist sont dans `~/Library/LaunchAgents/`. Voir SETUP.md pour le de
 | Gmail API | Gratuit | Quotas largement suffisants |
 | **Total** | **~$2-5/mois** | Principalement le cout Whisper pour les podcasts |
 
-## Roadmap V2 — AI Boardroom
+## V2 — AI Boardroom (LIVRE)
 
-Le concept : au lieu d'un seul prompt "partner VC" qui score une idee, on lance un **boardroom de 3 agents IA** qui debattent, inspires de vraies personnalites :
+4 board members virtuels debattent chaque idee de boite generee par le pipeline :
 
-| Agent | Persona | Role | Angle |
-|-------|---------|------|-------|
-| Elon Musk | First-principles, 10x scale | Visionnaire | "Can this scale to billions? What's the physics?" |
-| Sam Altman | AI-native investor, moat obsessed | Strategist | "What's the defensibility? How does AI reshape this?" |
-| Steve Jobs | Product purist, user obsessed | Quality check | "Is this simple? Beautiful? Would anyone love it?" |
+| Seat | Persona | Role | Lentille | Question cle |
+|------|---------|------|----------|-------------|
+| 1 | Steve Jobs | Chief Product Officer | Product/UX/Simplicite | "Would anyone love this?" |
+| 2 | Ann Miura-Ko | Contrarian-in-Chief | Thunder Lizards/Potentiel cache | "Is this small thing actually huge?" |
+| 3 | Ben Horowitz | Chief Reality Officer | Execution/Hard Things/Scaling | "What's the hard thing nobody sees?" |
+| 4 | JdLR | Chief Pattern Matcher | Founders/Timing/Marche | "Who builds this? Why now?" |
 
-Chaque idee recevrait les arguments pour/contre de chaque persona + un verdict final argumente. Inspire du concept "AI Boardroom" (Allie K. Miller).
+### Flow (boardroom inline)
+
+1. Le poll analyse chaque email et extrait les idees
+2. Chaque idee passe immediatement devant le AI Boardroom (4 appels Gemini + 1 synthese)
+3. La page Notion est creee avec le mini-deck ET l'analyse du board
+4. Le score affiche = score final du board (pondere par conviction)
+5. Vendredi 12h : digest hebdo
+6. Vendredi 14h : Charles review les idees de la semaine et tague Love it / Meh / No go
+
+### Fichiers concernes
+
+- `src/analysis/prompts.py` : personas + prompts boardroom member + prompt synthese
+- `src/analysis/analyzer.py` : `run_boardroom_debate()` avec retry et rate limit
+- `src/output/notion_writer.py` : `_build_boardroom_blocks()` + section boardroom dans `create_idea_page()`
+- `src/main.py` : integration dans le flow poll
+
+### Rate limits
+
+- 5 appels Gemini supplementaires par idee (4 members + 1 synthese)
+- Sleep 3s entre chaque appel → ~15s par idee pour le boardroom
+- Free tier Gemini 2.0 Flash (15 req/min) largement suffisant
 
 ## Risques techniques
 

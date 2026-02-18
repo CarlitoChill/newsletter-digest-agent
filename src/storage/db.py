@@ -62,6 +62,7 @@ def init_db():
             created_at TEXT DEFAULT (datetime('now')),
             UNIQUE(week_number, year)
         );
+
     """)
     conn.commit()
     conn.close()

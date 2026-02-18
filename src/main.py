@@ -2,15 +2,15 @@
 Newsletter Digest Agent — Point d'entrée principal.
 
 Deux modes :
-  python -m src.main poll     → Lit les nouveaux emails, analyse, crée les idées dans Notion
+  python -m src.main poll     → Lit les nouveaux emails, analyse, lance le AI Boardroom, crée les idées dans Notion
   python -m src.main digest   → Compile le digest hebdo, push Notion, envoie email
-  python -m src.main digest --force  → Recrée le digest même s'il existe
 
-Architecture :
-  - Le poll tourne régulièrement (toutes les heures, ou 1x/jour à 6h)
-  - Il traite les emails UN PAR UN : extraction → analyse → idées Notion
-  - Ça étale les appels Gemini dans le temps → zero rate limit, zero coût
-  - Le vendredi à 12h, le digest compile tout d'un coup (1 seul appel Gemini)
+Workflow :
+  - Content envoyé à newsletters@largo.cool en continu
+  - Le poll tourne 1x/jour à 6h : extraction → analyse → boardroom → idées Notion
+  - Chaque idée passe devant le AI Boardroom (4 board members) dès sa création
+  - Vendredi 12h : digest hebdo
+  - Vendredi 14h : Charles review les idées de la semaine (Love it / Meh / No go)
 
 Usage :
   cd projects/01-newsletter-digest
@@ -34,7 +34,7 @@ from src.ingestion.content_detector import detect_content, ContentType
 from src.ingestion.html_parser import parse_newsletter_html
 from src.ingestion.youtube_extractor import extract_youtube_transcript
 from src.ingestion.podcast_extractor import extract_podcast_transcript
-from src.analysis.analyzer import analyze_content
+from src.analysis.analyzer import analyze_content, run_boardroom_debate, analyze_competitors
 from src.output.notion_writer import create_idea_page
 from src.output.digest_compiler import run_weekly_digest
 
@@ -148,7 +148,7 @@ def poll():
 
             for j, idea in enumerate(ideas):
                 if j > 0:
-                    time.sleep(5)
+                    time.sleep(3)
                 idea_score = idea.get("score")
                 if isinstance(idea_score, str):
                     try:
@@ -158,7 +158,17 @@ def poll():
                 idea_tags = idea.get("tags", [])
                 if isinstance(idea_tags, str):
                     idea_tags = [idea_tags]
+
                 print(f"  Création idée Notion : {idea.get('name', '')} ({idea_score}/10)")
+                boardroom = run_boardroom_debate(idea, content)
+
+                time.sleep(3)
+                competitors = analyze_competitors(
+                    idea_name=idea.get("name", ""),
+                    one_liner=idea.get("one_liner", ""),
+                    why_now=idea.get("why_now", ""),
+                )
+
                 create_idea_page(
                     idea_name=idea.get("name", "Sans titre"),
                     one_liner=idea.get("one_liner", ""),
@@ -169,6 +179,8 @@ def poll():
                     score=idea_score,
                     tags=idea_tags,
                     week_label=week_label,
+                    boardroom=boardroom,
+                    competitors=competitors,
                 )
 
     print(f"\n=== Poll terminé : {len(emails)} emails traités ===\n")

@@ -1,5 +1,37 @@
 # Newsletter Digest Agent — Changelog
 
+## V2.1 — Board Scores, Startup Alternatives & Competitive Analysis (18 fevrier 2026)
+
+- **Scores individuels** : colonnes Steve, Ann, Ben, Jean dans la DB Notion — chacune un score /10 (1 = pas convaincu, 10 = je lance cette boite)
+- **Startup alternative** : chaque board member propose sa propre startup sur le meme pain/play, avec son angle a lui
+- **Analyse concurrentielle** : Gemini identifie 3-5 concurrents (directs/indirects/adjacents), evalue la maturite du marche et le moat possible
+- **Nouvelle structure des pages** :
+  1. Callout TLDR + score
+  2. Verdict du Board & next steps (synthese)
+  3. Avis du Board (4 members avec verdict + startup alternative)
+  4. Mini-deck (pitch structure)
+  5. Analyse concurrentielle (concurrents, marche, moat)
+- Backfill des scores numeriques sur les 12 pages existantes
+
+---
+
+## V2.0 — AI Boardroom (18 fevrier 2026)
+
+- **AI Boardroom** : 4 board members virtuels debattent chaque idee de boite
+  - Steve Jobs (Product/UX/Simplicite)
+  - Ann Miura-Ko (Thunder Lizards/Contrarian)
+  - Ben Horowitz (Execution/Hard Things)
+  - Jean de La Rochebrochard (Founders/Timing/Marche)
+- **Boardroom inline** : le board tourne sur chaque idee pendant le poll (pas de commande separee)
+- Chaque board member produit un verdict (invest/pass/dig_deeper), un score /10, des arguments pour/contre, et une question cle
+- Synthese automatique : score final pondere par conviction, consensus du board, point de friction, next steps concrets
+- Pages Notion enrichies avec section "AI Boardroom" apres le mini-deck
+- Score dans le callout et la colonne DB toujours synchronises
+- Rate limit : 3s entre chaque appel Gemini boardroom, resilient (le board fonctionne meme si un member echoue)
+- **Workflow** : content ongoing → poll quotidien (analyse + board) → digest vendredi 12h → review vendredi 14h
+
+---
+
 ## V1.0.1 — Code Review Cleanup (18 fevrier 2026)
 
 - Email deporte dans `.env` : fusion de `GMAIL_USER` + `CHARLES_EMAIL` en une seule variable `USER_EMAIL` chargee depuis `.env`
@@ -69,10 +101,3 @@
 - Configuration du filtre Gmail + alias newsletters
 - Page "Build in Public" creee dans Notion avec premier article
 
----
-
-## V2 — AI Boardroom (prevu semaine du 24 fevrier 2026)
-
-- Multi-agent debate pour scorer les idees (Elon Musk / Sam Altman / Steve Jobs)
-- Arguments pour/contre par persona dans chaque page Notion
-- Score final debattu, plus robuste

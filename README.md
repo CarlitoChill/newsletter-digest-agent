@@ -7,9 +7,11 @@ An AI agent that reads my newsletters, YouTube videos, and podcasts — and deli
 1. **Ingests** newsletters forwarded to a dedicated alias (+ YouTube links, podcast links)
 2. **Analyzes** each piece of content through a "senior VC partner" lens using Google Gemini 2.0 Flash
 3. **Generates startup ideas** with a structured mini-deck, score (/10), TLDR, and tags
-4. **Pushes ideas** to a Notion database ("Request for Startups") with full classification
-5. **Compiles a weekly digest** every Friday — top insights, recurring themes, advisor playbook
-6. **Sends an email recap** to the user with a link to the Notion digest
+4. **AI Boardroom** — 4 virtual board members (Jobs, Miura-Ko, Horowitz, JdLR) debate each idea, score it 1-10, and each propose their own startup alternative
+5. **Competitive analysis** — identifies 3-5 direct/indirect competitors, market maturity, and moat assessment
+6. **Pushes ideas** to a Notion database ("Request for Startups") with board + competitive analysis included
+7. **Compiles a weekly digest** every Friday — top insights, recurring themes, advisor playbook
+8. **Sends an email recap** to the user with a link to the Notion digest
 
 ## Architecture
 
@@ -19,16 +21,27 @@ An AI agent that reads my newsletters, YouTube videos, and podcasts — and deli
         v  (daily, 6am)
 [Gmail API] --> [Content Detection] --> [Extraction] --> [Gemini Flash]
                                                               |
-                                              +---------------+---------------+
-                                              v               v               v
-                                          [SQLite]    [Notion Database]   [Notion]
-                                          (storage)   (ideas + score)    (mini-decks)
+                                                    +---------+---------+
+                                                    v                   v
+                                                [Analysis]        [AI Boardroom]
+                                                (VC partner)      (4 board members)
+                                                    |                   |
+                                                    |           [Competitive Analysis]
+                                                    |                   |
+                                              +-----+-----+            |
+                                              v           v            v
+                                          [SQLite]    [Notion Database + Pages]
+                                          (storage)   (ideas + board + competitors)
                                               |
                                               v  (Friday 12pm)
                                       [Digest Compiler]
                                            |
                                            +--> Notion (digest page)
                                            +--> Email (weekly recap)
+                                                    |
+                                              (Friday 2pm)
+                                        Charles reviews ideas:
+                                        Love it / Meh / No go
 ```
 
 ## Stack
@@ -73,7 +86,7 @@ python scripts/setup_gmail_oauth.py
 ### Usage
 
 ```bash
-# Poll: read new emails, analyze, create idea pages
+# Poll: read new emails, analyze, run AI Boardroom, create idea pages
 python -m src.main poll
 
 # Digest: compile and send weekly digest
@@ -96,7 +109,11 @@ Each idea is stored with:
 | Property | Description |
 |----------|-------------|
 | Name | Idea name |
-| Score | /10 rating by the "VC partner" |
+| Score | /10 final board score |
+| Steve | /10 Steve Jobs (Product/UX) |
+| Ann | /10 Ann Miura-Ko (Contrarian/Thunder Lizards) |
+| Ben | /10 Ben Horowitz (Execution/Scaling) |
+| Jean | /10 Jean de La Rochebrochard (Founders/Timing) |
 | TLDR | 50-word pitch |
 | Tags | SaaS, Marketplace, AI Agency, B2B, FinTech, etc. |
 | Source | Where the idea came from |

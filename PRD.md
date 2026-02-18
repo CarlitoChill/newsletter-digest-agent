@@ -42,9 +42,16 @@
 12. **Cycle vendredi→vendredi** : Le digest compile tout ce qui a été ingéré depuis le dernier digest (pas de contenu perdu entre deux cycles)
 13. **Anti-retraitement** : Les emails déjà traités ne sont jamais reprocessés (tracking par message_id en SQLite)
 
-### V2 — AI Boardroom (semaine du 24 fevrier)
+### V2 — AI Boardroom (18 fevrier 2026) — LIVRE
 
-1. **Multi-agent debate "AI Boardroom"** : 3 agents IA (Elon Musk, Sam Altman, Steve Jobs) debattent chaque idee de boite. Chacun argumente avec sa lentille (scale 10x, defensibility/moat, product purity). Score final debattu + arguments pour/contre dans la page Notion. Inspire du concept d'Allie K. Miller.
+1. **AI Boardroom inline** : 4 board members virtuels (Steve Jobs, Ann Miura-Ko, Ben Horowitz, JdLR) debattent chaque idee pendant le poll (pas de commande separee)
+2. Chaque board member produit un verdict (invest/pass/dig_deeper), un score, et ses arguments
+3. Une synthese automatique consolide les 4 verdicts en un score final pondere par conviction
+4. **Workflow vendredi** : digest a 12h, review des idees (avec analyses du board) a 14h, Charles tague Love it / Meh / No go
+
+### V2.1 — Planned
+
+1. Board members additionnels par sujet (ex: Patrick Collison pour FinTech, Miyamoto pour Gaming)
 2. Detection de patterns cross-newsletters (themes recurrents = signaux forts)
 3. Dashboard analytics (idees/semaine, score moyen, top sources)
 
@@ -58,7 +65,7 @@
 ### Non-Functional Requirements
 
 - **Performance :** Digest livré chaque vendredi à 12h (heure de Paris), polling quotidien à 6h
-- **Rate limits :** Appels Gemini étalés (1 email à la fois, 5s entre les idées) → zéro coût sur free tier
+- **Rate limits :** Appels Gemini étalés (1 email à la fois, 3s entre les idées et board members) → zéro coût sur free tier
 - **Security :** Credentials en `.env`, `credentials.json` et `token.json` en `.gitignore`
 - **Scalability :** Supporte 25+ newsletters/semaine sans perte de qualité ni rate limit
 
@@ -85,9 +92,10 @@
    - **Lien YouTube** → transcription via youtube-transcript-api
    - **Lien Spotify/Apple Podcasts** → download audio (yt-dlp) + transcription (Whisper)
 4. Analyse avec Gemini 2.0 Flash (prompt "partner VC senior") → takeaways, ideas, score, tags
-5. Sauvegarde en SQLite + création immédiate des pages d'idées dans la database Notion
-6. Vendredi 12h : compilation digest hebdo (1 appel Gemini)
-7. Push Notion (page digest) + email récap à USER_EMAIL
+5. Chaque idée passe devant le AI Boardroom (4 board members) → score final, verdicts, arguments
+6. Sauvegarde en SQLite + création immédiate des pages d'idées dans Notion (avec analyse du board)
+7. Vendredi 12h : compilation digest hebdo (1 appel Gemini) + email
+8. Vendredi 14h : Charles review les idées de la semaine et tague Love it / Meh / No go
 
 **Output :**
 - 1 page Notion "Digest Semaine XX" par semaine
@@ -101,7 +109,7 @@
 - **Processing :** Python 3.11+
 - **LLM :** Google Gemini 2.0 Flash — analyses individuelles + digest + mini-decks
 - **Transcription podcasts :** OpenAI Whisper API
-- **Orchestration :** Cron (1x/jour à 6h + vendredi 12h pour le digest)
+- **Orchestration :** launchd (1x/jour à 6h + vendredi 12h digest)
 - **Output :** Notion API (database + pages) + Gmail API (envoi email)
 - **Storage :** SQLite (fichier local)
 
@@ -112,16 +120,24 @@
         ▼ (1x/jour, 6h)
 [Gmail API] → [Détection type] → [Extraction contenu] → [Gemini Flash]
                                                               │
-                                              ┌───────────────┼───────────────┐
-                                              ▼               ▼               ▼
-                                          [SQLite]    [Notion Database]   [Notion DB]
-                                          (analyses)  (idées + score)    (mini-decks)
+                                                    ┌─────────┴─────────┐
+                                                    ▼                   ▼
+                                                [Analyse]         [AI Boardroom]
+                                                (partner VC)      (4 members)
+                                                    │                   │
+                                              ┌─────┴─────┐            │
+                                              ▼           ▼            ▼
+                                          [SQLite]    [Notion Database + Pages]
+                                          (analyses)  (idées + board analysis)
                                               │
                                               ▼  (Vendredi 12h)
                                       [Digest Compiler]
                                            │
                                            ├──→ Notion (page digest)
                                            └──→ Email (USER_EMAIL)
+                                                    │
+                                              (Vendredi 14h)
+                                        Charles review : Love it / Meh / No go
 ```
 
 ## 8. Risks & Mitigations
@@ -142,7 +158,7 @@
 | V0.5 — Notion | Push Notion (digest + idées en sous-pages) | FAIT |
 | V1 — MVP | Pipeline complet : ingestion → analyse → idées scorées dans database Notion → digest hebdo → email | FAIT |
 | V1.1 — Automatisation | Scheduling automatique (launchd), zero intervention | FAIT |
-| V2 — AI Boardroom | Multi-agent debate (Elon/Sam/Steve) pour scorer les idees | TODO (semaine du 24 fev) |
+| V2 — AI Boardroom | 4 board members (Jobs/Miura-Ko/Horowitz/JdLR) debattent chaque idee | FAIT |
 | V3 — Analytics | Patterns cross-newsletters, dashboard, daily digest | TODO |
 
 ## 10. Décisions prises
@@ -158,9 +174,9 @@
 - [x] **Email** : Sujet inclut le lundi de la semaine (ex: "Newsletter Digest — Semaine 7 — Lundi 10 février 2026")
 - [x] **Anti-retraitement** : Tracking par message_id en SQLite, fenêtre de 14 jours sur Gmail API
 
-## 11. Open Questions (V2+)
+## 11. Open Questions (V2.1+)
 
-- [ ] AI Boardroom : quels autres "board members" en plus d'Elon/Sam/Steve ? (Marc Andreessen ? Peter Thiel ? Jensen Huang ?)
+- [ ] Board members additionnels par sujet (ex: Patrick Collison pour FinTech, Miyamoto pour Gaming) ?
 - [ ] Mini-digest quotidien en plus du hebdo ?
 - [ ] Dashboard analytics des idees (score moyen/semaine, top sources, tendances) ?
 - [ ] Export automatique vers un blog/site "Build in Public" ?

@@ -179,6 +179,248 @@ def create_digest_page(
     return url
 
 
+def _build_verdict_blocks(boardroom: dict) -> list[dict]:
+    """Construit les blocs Notion pour le verdict du board + next steps (section 1)."""
+    blocks = []
+    synthesis = boardroom.get("synthesis", {})
+    if not synthesis:
+        return blocks
+
+    verdict_emojis = {"invest": "✅", "pass": "❌", "no_consensus": "🔍"}
+
+    final_score = synthesis.get("final_score", "?")
+    consensus = synthesis.get("consensus", "?")
+    consensus_emoji = verdict_emojis.get(consensus, "❓")
+
+    blocks.append({"type": "divider", "divider": {}})
+    blocks.append({
+        "type": "heading_2",
+        "heading_2": {
+            "rich_text": [{"type": "text", "text": {"content": f"Verdict du Board — {consensus_emoji} {consensus} ({final_score}/10)"}}]
+        },
+    })
+
+    synth_text = synthesis.get("synthesis", "")
+    if synth_text:
+        blocks.append({
+            "type": "callout",
+            "callout": {
+                "rich_text": [{"type": "text", "text": {"content": synth_text}}],
+                "icon": {"type": "emoji", "emoji": "📋"},
+                "color": "purple_background",
+            },
+        })
+
+    debate_point = synthesis.get("key_debate_point", "")
+    if debate_point:
+        blocks.append({
+            "type": "paragraph",
+            "paragraph": {"rich_text": [
+                {"type": "text", "text": {"content": "Point de friction : "}, "annotations": {"bold": True}},
+                {"type": "text", "text": {"content": debate_point}},
+            ]},
+        })
+
+    next_steps = synthesis.get("next_steps", [])
+    if next_steps:
+        blocks.append({
+            "type": "heading_3",
+            "heading_3": {
+                "rich_text": [{"type": "text", "text": {"content": "Next steps"}}]
+            },
+        })
+        for step in next_steps:
+            blocks.append({
+                "type": "to_do",
+                "to_do": {
+                    "rich_text": [{"type": "text", "text": {"content": step}}],
+                    "checked": False,
+                },
+            })
+
+    return blocks
+
+
+def _build_member_blocks(boardroom: dict) -> list[dict]:
+    """Construit les blocs Notion pour les avis individuels des board members (section 2)."""
+    blocks = []
+    verdicts = boardroom.get("verdicts", [])
+    if not verdicts:
+        return blocks
+
+    verdict_emojis = {"invest": "✅", "pass": "❌", "dig_deeper": "🔍"}
+
+    blocks.append({"type": "divider", "divider": {}})
+    blocks.append({
+        "type": "heading_2",
+        "heading_2": {
+            "rich_text": [{"type": "text", "text": {"content": "Avis du Board"}}]
+        },
+    })
+
+    for v in verdicts:
+        emoji = v.get("member_emoji", "👤")
+        name = v.get("member_name", "?")
+        verdict = v.get("verdict", "?")
+        verdict_emoji = verdict_emojis.get(verdict, "❓")
+        score = v.get("score", "?")
+        conviction = v.get("conviction", "?")
+
+        blocks.append({
+            "type": "heading_3",
+            "heading_3": {
+                "rich_text": [{"type": "text", "text": {"content": f"{emoji} {name} — {verdict_emoji} {verdict} ({score}/10)"}}]
+            },
+        })
+
+        blocks.append({
+            "type": "callout",
+            "callout": {
+                "rich_text": [{"type": "text", "text": {"content": f"Conviction : {conviction}"}}],
+                "icon": {"type": "emoji", "emoji": verdict_emoji},
+                "color": {
+                    "invest": "green_background",
+                    "pass": "red_background",
+                    "dig_deeper": "blue_background",
+                }.get(verdict, "gray_background"),
+            },
+        })
+
+        arg_for = v.get("argument_for", "")
+        if arg_for:
+            blocks.append({
+                "type": "paragraph",
+                "paragraph": {"rich_text": [
+                    {"type": "text", "text": {"content": "Pour : "}, "annotations": {"bold": True}},
+                    {"type": "text", "text": {"content": arg_for}},
+                ]},
+            })
+
+        arg_against = v.get("argument_against", "")
+        if arg_against:
+            blocks.append({
+                "type": "paragraph",
+                "paragraph": {"rich_text": [
+                    {"type": "text", "text": {"content": "Contre : "}, "annotations": {"bold": True}},
+                    {"type": "text", "text": {"content": arg_against}},
+                ]},
+            })
+
+        key_q = v.get("key_question", "")
+        if key_q:
+            blocks.append({
+                "type": "paragraph",
+                "paragraph": {"rich_text": [
+                    {"type": "text", "text": {"content": "Question clé : "}, "annotations": {"bold": True, "italic": True}},
+                    {"type": "text", "text": {"content": key_q}, "annotations": {"italic": True}},
+                ]},
+            })
+
+        alt = v.get("startup_alternative", "")
+        if alt:
+            blocks.append({
+                "type": "callout",
+                "callout": {
+                    "rich_text": [
+                        {"type": "text", "text": {"content": "Ma startup : "}, "annotations": {"bold": True}},
+                        {"type": "text", "text": {"content": alt}},
+                    ],
+                    "icon": {"type": "emoji", "emoji": "🚀"},
+                    "color": "yellow_background",
+                },
+            })
+
+    return blocks
+
+
+def _build_competitor_blocks(competitors: dict) -> list[dict]:
+    """Construit les blocs Notion pour l'analyse concurrentielle (section 4)."""
+    blocks = []
+    if not competitors or not competitors.get("competitors"):
+        return blocks
+
+    blocks.append({"type": "divider", "divider": {}})
+    blocks.append({
+        "type": "heading_2",
+        "heading_2": {
+            "rich_text": [{"type": "text", "text": {"content": "Analyse concurrentielle"}}]
+        },
+    })
+
+    market_insight = competitors.get("market_insight", "")
+    maturity = competitors.get("market_maturity", "")
+    if market_insight:
+        maturity_label = {
+            "nascent": "Naissant", "emerging": "Émergent", "growing": "En croissance",
+            "mature": "Mature", "saturated": "Saturé",
+        }.get(maturity, maturity)
+        blocks.append({
+            "type": "callout",
+            "callout": {
+                "rich_text": [
+                    {"type": "text", "text": {"content": f"Marché : {maturity_label}\n"}, "annotations": {"bold": True}},
+                    {"type": "text", "text": {"content": market_insight}},
+                ],
+                "icon": {"type": "emoji", "emoji": "🏟️"},
+                "color": "blue_background",
+            },
+        })
+
+    threat_emojis = {"high": "🔴", "medium": "🟡", "low": "🟢"}
+    type_labels = {"direct": "Direct", "indirect": "Indirect", "adjacent": "Adjacent"}
+
+    for comp in competitors.get("competitors", []):
+        name = comp.get("name", "?")
+        comp_type = type_labels.get(comp.get("type", ""), "?")
+        threat = comp.get("threat_level", "?")
+        threat_emoji = threat_emojis.get(threat, "⚪")
+        url = comp.get("url", "")
+        desc = comp.get("description", "")
+        funding = comp.get("funding", "")
+        diff = comp.get("differentiation", "")
+
+        header = f"{threat_emoji} {name} — {comp_type}"
+        if url:
+            header = f"{threat_emoji} {name} ({url}) — {comp_type}"
+
+        blocks.append({
+            "type": "heading_3",
+            "heading_3": {
+                "rich_text": [{"type": "text", "text": {"content": header}}]
+            },
+        })
+
+        body_parts = []
+        if desc:
+            body_parts.append(desc)
+        if funding:
+            body_parts.append(f"Financement : {funding}")
+        if diff:
+            body_parts.append(f"Notre différence : {diff}")
+
+        if body_parts:
+            blocks.append({
+                "type": "paragraph",
+                "paragraph": {"rich_text": [{"type": "text", "text": {"content": "\n".join(body_parts)}}]},
+            })
+
+    moat = competitors.get("moat_assessment", "")
+    if moat:
+        blocks.append({
+            "type": "callout",
+            "callout": {
+                "rich_text": [
+                    {"type": "text", "text": {"content": "Moat : "}, "annotations": {"bold": True}},
+                    {"type": "text", "text": {"content": moat}},
+                ],
+                "icon": {"type": "emoji", "emoji": "🏰"},
+                "color": "green_background",
+            },
+        })
+
+    return blocks
+
+
 def create_idea_page(
     idea_name: str,
     one_liner: str,
@@ -189,6 +431,8 @@ def create_idea_page(
     score: int | None = None,
     tags: list[str] | None = None,
     week_label: str = "",
+    boardroom: dict | None = None,
+    competitors: dict | None = None,
 ) -> str:
     """
     Crée une entrée dans la database "Request for Startups" avec le mini-deck.
@@ -203,14 +447,21 @@ def create_idea_page(
         score: Note de 0 à 10 attribuée par le "partner VC".
         tags: Liste de tags (SaaS, Marketplace, AI Agency, etc.).
         week_label: Label de la semaine (ex: "Semaine 7").
+        boardroom: Résultats du AI Boardroom (verdicts + synthesis).
 
     Returns:
         URL de la page Notion créée.
     """
     # Callout jaune TLDR + score en haut de la page
     callout_blocks = []
-    if tldr or score is not None:
-        score_display = f" {score}/10" if score is not None else ""
+
+    # Si boardroom, le score affiché est le score final du board
+    display_score = score
+    if boardroom and boardroom.get("synthesis", {}).get("final_score"):
+        display_score = boardroom["synthesis"]["final_score"]
+
+    if tldr or display_score is not None:
+        score_display = f" {display_score}/10" if display_score is not None else ""
         callout_text = f"{score_display}  —  {tldr}" if tldr else f"{score_display}"
         callout_blocks.append({
             "type": "callout",
@@ -233,16 +484,28 @@ def create_idea_page(
 
     deck_blocks = _markdown_to_notion_blocks(deck_markdown)
 
-    # Callout en premier, puis le deck
-    all_blocks = callout_blocks + deck_blocks
+    # Boardroom : verdict du board (section 1) + avis individuels (section 2)
+    verdict_blocks = []
+    member_blocks = []
+    if boardroom and boardroom.get("verdicts"):
+        verdict_blocks = _build_verdict_blocks(boardroom)
+        member_blocks = _build_member_blocks(boardroom)
+
+    # Analyse concurrentielle (section 4)
+    competitor_blocks = []
+    if competitors:
+        competitor_blocks = _build_competitor_blocks(competitors)
+
+    # Ordre : callout → verdict & next steps → avis individuels → mini-deck → concurrence
+    all_blocks = callout_blocks + verdict_blocks + member_blocks + deck_blocks + competitor_blocks
     children = all_blocks[:100]
 
-    # Propriétés de la database
+    # Propriétés de la database — utilise le score boardroom si disponible
     properties = {
         "title": [{"text": {"content": idea_name}}],
     }
-    if score is not None:
-        properties["Score"] = score
+    if display_score is not None:
+        properties["Score"] = display_score
     if tldr:
         properties["TLDR"] = tldr
     if tags:
@@ -260,6 +523,19 @@ def create_idea_page(
         properties["Semaine"] = week_label
     properties["Status"] = "Nouveau"
 
+    if boardroom and boardroom.get("verdicts"):
+        member_to_column = {
+            "steve_jobs": "Steve",
+            "ann_miura_ko": "Ann",
+            "ben_horowitz": "Ben",
+            "jdlr": "Jean",
+        }
+        for v in boardroom["verdicts"]:
+            column = member_to_column.get(v.get("member_id", ""))
+            member_score = v.get("score")
+            if column and member_score is not None:
+                properties[column] = member_score
+
     page = notion.pages.create(
         parent={"database_id": NOTION_IDEAS_DB_ID},
         properties=properties,
@@ -274,5 +550,6 @@ def create_idea_page(
             )
 
     url = page.get("url", "")
-    print(f"  Page idée créée : {idea_name} ({score}/10) → {url}")
+    board_label = f" [Board: {boardroom['synthesis'].get('consensus', '?')}]" if boardroom and boardroom.get("synthesis") else ""
+    print(f"  Page idée créée : {idea_name} ({display_score}/10){board_label} → {url}")
     return url
