@@ -1,5 +1,13 @@
 # Newsletter Digest Agent — Changelog
 
+## Roadmap V2.1 / V3 (18 fevrier 2026)
+
+- **PRD & PLAN** : Roadmap mise a jour selon les priorites.
+- **V2.1 — A livrer** : (1) Detection patterns cross-newsletters, (2) Build in Public (export blog/site), (3) Migration google.generativeai → google.genai, (4) Verifier launchd (workflow en continu).
+- **V3 — Moyen terme** : (1) Board members additionnels par sujet, (2) Plus de sources (RSS, newsletters), (3) Petit front "Idee de la semaine".
+
+---
+
 ## V2.1 — Board Scores, Startup Alternatives & Competitive Analysis (18 fevrier 2026)
 
 - **Scores individuels** : colonnes Steve, Ann, Ben, Jean dans la DB Notion — chacune un score /10 (1 = pas convaincu, 10 = je lance cette boite)

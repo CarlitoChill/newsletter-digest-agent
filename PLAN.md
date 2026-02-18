@@ -182,6 +182,8 @@ Le poll et le digest tournent automatiquement via macOS launchd :
 
 Les fichiers plist sont dans `~/Library/LaunchAgents/`. Voir SETUP.md pour le detail.
 
+**V2.1** : Verifier que launchd est bien installe et que les jobs tournent (workflow en continu).
+
 ## Credentials & API keys
 
 > **Guide detaille :** Voir [SETUP.md](SETUP.md) pour le step-by-step complet.
@@ -235,6 +237,23 @@ Les fichiers plist sont dans `~/Library/LaunchAgents/`. Voir SETUP.md pour le de
 - 5 appels Gemini supplementaires par idee (4 members + 1 synthese)
 - Sleep 3s entre chaque appel → ~15s par idee pour le boardroom
 - Free tier Gemini 2.0 Flash (15 req/min) largement suffisant
+
+## V2.1 — A livrer
+
+| Item | Description |
+|------|--------------|
+| **Patterns cross-newsletters** | Detection des themes recurrents sur la semaine = signaux forts (section dans le digest ou sur les idees) |
+| **Build in Public** | Export automatique vers un blog/site — partie integrante de la V2.1 |
+| **Migration google.genai** | Remplacer `google.generativeai` (deprecated) par `google.genai` — SDK a jour, plus de warning |
+| **Verif launchd** | S'assurer que le poll (6h) et le digest (vendredi 12h) sont installes et tournent pour le workflow en continu |
+
+## V3 — A moyen terme
+
+| Item | Description |
+|------|--------------|
+| **Board members par sujet** | Un ou deux membres additionnels selon le domaine (ex. Patrick Collison pour FinTech, Miyamoto pour Gaming) — actives selon les tags de l'idee |
+| **Plus de sources** | Alimentation par d'autres newsletters et/ou flux RSS ; la matiere premiere, c'est le content |
+| **Front "Idee de la semaine"** | Petit front / page web : les gens peuvent voir "c'est quoi l'idee de la semaine" (export public) |
 
 ## Risques techniques
 

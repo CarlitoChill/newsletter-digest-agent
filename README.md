@@ -125,6 +125,11 @@ Each idea is stored with:
 
 ~$0-5/month. Gemini free tier covers all LLM calls. Whisper API costs ~$0.36/hour of podcast.
 
+## Roadmap
+
+- **V2.1** — Patterns cross-newsletters, Build in Public (export blog/site), migration to `google.genai`, verify launchd.
+- **V3** — Board members by topic, more sources (RSS, newsletters), public "Idee de la semaine" page.
+
 ## Built by
 
 [Charles Thomas](https://www.linkedin.com/in/charlesjpthomas) — advisor, ex-CEO @ Comet (0 to 60M EUR), building with AI.

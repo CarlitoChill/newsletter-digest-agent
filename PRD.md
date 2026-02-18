@@ -49,18 +49,24 @@
 3. Une synthese automatique consolide les 4 verdicts en un score final pondere par conviction
 4. **Workflow vendredi** : digest a 12h, review des idees (avec analyses du board) a 14h, Charles tague Love it / Meh / No go
 
-### V2.1 — Planned
+### V2.1 — A livrer
 
-1. Board members additionnels par sujet (ex: Patrick Collison pour FinTech, Miyamoto pour Gaming)
-2. Detection de patterns cross-newsletters (themes recurrents = signaux forts)
-3. Dashboard analytics (idees/semaine, score moyen, top sources)
+1. **Detection de patterns cross-newsletters** — themes recurrents = signaux forts (section dediee dans le digest ou les idees)
+2. **Build in Public** — export automatique vers un blog/site (partie integrante de la V2.1)
+3. **Migration google.generativeai → google.genai** — supprimer le deprecation warning, utiliser le SDK a jour
+4. **Verifier launchd** — s'assurer que le poll (6h) et le digest (vendredi 12h) sont installes et tournent pour le workflow en continu
 
-### Nice-to-Have (V3+)
+### V3 — A moyen terme
+
+1. **Board members additionnels par sujet** — ex. Patrick Collison pour FinTech, Miyamoto pour Gaming (un ou deux membres selon les tags de l'idee)
+2. **Plus de sources de contenu** — alimentation par d'autres newsletters et/ou flux RSS (la matiere premiere, c'est le content)
+3. **Petit front / page web** — export "Idee de la semaine" : une page publique ou les gens peuvent voir "c'est quoi l'idee de la semaine"
+
+### Nice-to-Have (au-dela de V3)
 
 1. Digest quotidien en plus du hebdo
 2. Integration Slack/Telegram/WhatsApp pour delivery
 3. Vision (GPT-4V) pour newsletters tres visuelles
-4. Export automatique vers un blog/site "Build in Public"
 
 ### Non-Functional Requirements
 
@@ -159,7 +165,8 @@
 | V1 — MVP | Pipeline complet : ingestion → analyse → idées scorées dans database Notion → digest hebdo → email | FAIT |
 | V1.1 — Automatisation | Scheduling automatique (launchd), zero intervention | FAIT |
 | V2 — AI Boardroom | 4 board members (Jobs/Miura-Ko/Horowitz/JdLR) debattent chaque idee | FAIT |
-| V3 — Analytics | Patterns cross-newsletters, dashboard, daily digest | TODO |
+| V2.1 — Patterns + Build in Public + GenAI + launchd | Patterns cross-newsletters, Build in Public, migration google.genai, verif launchd | TODO |
+| V3 — Board par sujet + sources + front | Board members par sujet, plus de sources (RSS, newsletters), page "Idee de la semaine" | TODO |
 
 ## 10. Décisions prises
 
@@ -174,9 +181,8 @@
 - [x] **Email** : Sujet inclut le lundi de la semaine (ex: "Newsletter Digest — Semaine 7 — Lundi 10 février 2026")
 - [x] **Anti-retraitement** : Tracking par message_id en SQLite, fenêtre de 14 jours sur Gmail API
 
-## 11. Open Questions (V2.1+)
+## 11. Open Questions (V3+)
 
-- [ ] Board members additionnels par sujet (ex: Patrick Collison pour FinTech, Miyamoto pour Gaming) ?
 - [ ] Mini-digest quotidien en plus du hebdo ?
-- [ ] Dashboard analytics des idees (score moyen/semaine, top sources, tendances) ?
-- [ ] Export automatique vers un blog/site "Build in Public" ?
+- [ ] Integration Slack/Telegram/WhatsApp pour delivery ?
+- [ ] Vision (GPT-4V) pour newsletters tres visuelles ?
