@@ -180,7 +180,7 @@ Le poll et le digest tournent automatiquement via macOS launchd :
 - **Poll** : tous les jours a 6h (heure de Paris) — `scripts/run_poll.sh`
 - **Digest** : tous les vendredis a 12h (heure de Paris) — `scripts/run_digest.sh`
 
-Les fichiers plist sont dans `~/Library/LaunchAgents/`. Voir SETUP.md pour le detail.
+Les fichiers plist sont dans `scripts/launchd/` (a copier dans `~/Library/LaunchAgents/` en remplacant le chemin projet). Voir [TROUBLESHOOTING.md](TROUBLESHOOTING.md) pour l'installation et le depannage.
 
 **V2.1** : Verifier que launchd est bien installe et que les jobs tournent (workflow en continu).
 
@@ -254,6 +254,7 @@ Les fichiers plist sont dans `~/Library/LaunchAgents/`. Voir SETUP.md pour le de
 | **Board members par sujet** | Un ou deux membres additionnels selon le domaine (ex. Patrick Collison pour FinTech, Miyamoto pour Gaming) — actives selon les tags de l'idee |
 | **Plus de sources** | Alimentation par d'autres newsletters et/ou flux RSS ; la matiere premiere, c'est le content |
 | **Front "Idee de la semaine"** | Petit front / page web : les gens peuvent voir "c'est quoi l'idee de la semaine" (export public) |
+| **Renommage du projet** | Remplacer "Newsletter Digest" par un nom type RFS Engine / Idea Engine (voir PRD §12 pour les candidats) |
 
 ## Risques techniques
 
