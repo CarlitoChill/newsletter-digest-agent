@@ -61,6 +61,7 @@
 1. **Board members additionnels par sujet** — ex. Patrick Collison pour FinTech, Miyamoto pour Gaming (un ou deux membres selon les tags de l'idee)
 2. **Plus de sources de contenu** — alimentation par d'autres newsletters et/ou flux RSS (la matiere premiere, c'est le content)
 3. **Petit front / page web** — export "Idee de la semaine" : une page publique ou les gens peuvent voir "c'est quoi l'idee de la semaine"
+4. **Renommage du projet** — "Newsletter Digest" ne decrit plus le cœur (moteur Request for Startups). En V3, adopter un nom aligne (ex. RFS Engine, Idea Engine, Build in Public Engine — voir section 11 pour les candidats).
 
 ### Nice-to-Have (au-dela de V3)
 
@@ -186,3 +187,15 @@
 - [ ] Mini-digest quotidien en plus du hebdo ?
 - [ ] Integration Slack/Telegram/WhatsApp pour delivery ?
 - [ ] Vision (GPT-4V) pour newsletters tres visuelles ?
+
+## 12. Candidats nom du projet (V3)
+
+Pour remplacer "Newsletter Digest" par un nom qui reflete le cœur : moteur d'idees / Request for Startups.
+
+| Candidat | Note |
+|----------|------|
+| **RFS Engine** | Direct, lie a la DB Notion "Request for Startups" |
+| **Idea Engine** | Generique, comprehensible par tous |
+| **Startup Idea Engine** | Explicite |
+| **Build in Public Engine** | Aligne avec la V2.1 Build in Public |
+| **Boardroom** | Court, evoque le AI Boardroom (risque confusion avec le produit Notion) |

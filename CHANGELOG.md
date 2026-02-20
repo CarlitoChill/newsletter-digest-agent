@@ -1,5 +1,19 @@
 # Newsletter Digest Agent — Changelog
 
+## Session 18 fevrier 2026 (fait du jour)
+
+- DB Notion vs pages flottantes
+- Boardroom pour RFS
+- Refonte de la page RFS
+- Push GitHub
+- Retours Arnaud (CTO)
+- Gemini Rate Limit
+- Dry-run sur les 12 idees
+- Maj des fichiers locaux & git
+- Definition de la V2.1 et V3
+
+---
+
 ## Roadmap V2.1 / V3 (18 fevrier 2026)
 
 - **PRD & PLAN** : Roadmap mise a jour selon les priorites.
